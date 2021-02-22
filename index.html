@@ -36,11 +36,15 @@
         <p>
             <div id="dateSelector"></div>
             <svg id="myCanvas" style="width:100%; height: 200px;"></svg>
-            <table><thead></thead><tbody></tbody></table>
+
+            <table>
+                <thead></thead>
+                <tbody></tbody>
+            </table>
         </p>
 
         <script>
-            csv_url = false ? "category-brands.csv" : "https://raw.githubusercontent.com/bernardo-dauria/2021-02-10-example/main/category-brands.csv";
+            csv_url = false ? "histogram-data.csv" : "https://raw.githubusercontent.com/RoberAlcaraz/d3js-Assignment-4/main/histogram-data.csv";
             d3.csv(csv_url).then(tidying)
 
             function updateTable(d) {
@@ -68,9 +72,17 @@
             function tidying(d) {
                 data = d;
                 columns = d.columns;
-                maxValue = d3.reduce(d, (p, v) => Math.max(p,v.value) , 0)
+                
+                updateTable(data)
+                makeHeader(data)
 
-                dates = Array.from(new Set(d.map(e => e.date)));
+                updateSelect()
+            }
+
+            function updateSelect(e) {
+                val = d3.select("select").node().value
+                fdata = d3.filter(data, d => d.date == val)
+                updateTable(fdata)
             }
 
         </script>
