@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>d3.js data driven page</title>
+        <script src="https://d3js.org/d3.v6.min.js"></script>
+        <style>
+
+            #myCanvas {
+                background-color: yellow;
+            }
+
+            th {
+                color: blue;
+            }
+
+            .name {
+                color: red;
+                border: solid black 1pt;
+            }
+
+            .name:hover {
+                border-width: 2pt;
+            }
+
+            .date {
+                color: green;
+            }
+            .date:hover
+            {
+                font-weight: bold;
+            }
+        </style>
+    </head>
+
+    <body>
+        <p>
+            <div id="dateSelector"></div>
+            <svg id="myCanvas" style="width:100%; height: 200px;"></svg>
+            <table><thead></thead><tbody></tbody></table>
+        </p>
+
+        <script>
+            csv_url = false ? "category-brands.csv" : "https://raw.githubusercontent.com/bernardo-dauria/2021-02-10-example/main/category-brands.csv";
+            d3.csv(csv_url).then(tidying)
+
+            function updateTable(d) {
+                d3.select("table tbody")
+                    .selectAll("tr")
+                    .data(d)
+                    .join("tr")
+                    .selectAll("td")
+                    .data(e => columns.map(x => e[x]))
+                    .join("td")
+                        .text(x => x);
+            }
+
+            function makeHeader(d) {
+                d3.select("table thead").selectAll("tr").remove()
+
+                d3.select("table thead")
+                    .append("tr")
+                    .selectAll("th")
+                    .data(columns)
+                    .join("th").text(e => e)
+            }
+
+            var data, columns, maxValue;
+            function tidying(d) {
+                data = d;
+                columns = d.columns;
+                maxValue = d3.reduce(d, (p, v) => Math.max(p,v.value) , 0)
+
+                dates = Array.from(new Set(d.map(e => e.date)));
+            }
+
+        </script>
+    </body>
+</html>
