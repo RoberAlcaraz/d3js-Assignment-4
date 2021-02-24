@@ -59,14 +59,11 @@
         </p>
 
         <script>
-            csv_url = false ? "histogram-data1.csv" : "https://raw.githubusercontent.com/RoberAlcaraz/d3js-Assignment-4/main/histogram-data.csv";
-            cs = {
-                    "date": "fecha",
-                    "name": "nombre",
-                    "category": "categoria",
-                    "value": "valor"
-                };
+            csv_url = false ? "histogram-data1.csv" : "https://raw.githubusercontent.com/RoberAlcaraz/d3js-Assignment-4/main/histogram-data1.csv";
+          
             d3.csv(csv_url).then(tidying)
+
+            var data, columns, maxValue;
 
             function updateTable(d) {
                 d3.select("table tbody")
@@ -77,7 +74,6 @@
                     .data(e => columns.map(x => e[x]))
                     .join("td")
                         .text(x => x)
-                        .on("click", x => CompanyUpdate(x))
             }
 
             var prueba;
@@ -98,18 +94,9 @@
                     .join("th").text(e => e)
             }
 
-            var data, columns, maxValue;
+            
             function tidying(d) {
-                data = d;
-                columns = d.columns;
-                maxValue = d3.reduce(d, (p, v) => Math.max(p,v.value) , 0)
-
-                dates = Array.from(new Set(d.map(e => e.date)));
-                dateSelector(dates);
-
-                updateSelect()
-                makeHeader(d)
-
+                console.log(d)
             }
 
             function dateSelector(d) {
