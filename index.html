@@ -6,11 +6,11 @@
         <style>
 
             #myCanvas {
-                background-color: yellow;
+                background-color:darkseagreen;
             }
 
             th {
-                color: blue;
+                color:darkblue;
             }
 
             .name {
@@ -33,18 +33,39 @@
     </head>
 
     <body>
+        <h1>3rd Assignment Data Tidying and Reporting</h1>
+        <hr>
         <p>
+            In the folllowing example we can observe some data of well-knowns brands. We have the date,
+            the name of the company, their category and finally their value. We can select the top 10 
+            most valuable companies from each year and then, if we click in one of them, their color in 
+            the graph will change.
+        </p>
+        <p>
+            This page is inspired by the 
+            <a href="https://observablehq.com/@d3/bar-chart-race" target="_blank"><b>Bar Chart Race</b></a>
+            <button onclick="colorP()">Click me</button>
+
             <div id="dateSelector"></div>
             <svg id="myCanvas" style="width:100%; height: 200px;"></svg>
-
-            <table>
+            <table id="myTable" border="1">
                 <thead></thead>
-                <tbody></tbody>
+                <tbody>
+                    <tr>
+                        <td></td>
+                    </tr>
+                </tbody>
             </table>
         </p>
 
         <script>
-            csv_url = false ? "histogram-data.csv" : "https://raw.githubusercontent.com/RoberAlcaraz/d3js-Assignment-4/main/histogram-data.csv";
+            csv_url = false ? "histogram-data.csv" : "https://raw.githubusercontent.com/bernardo-dauria/2021-02-10-example/main/category-brands.csv";
+            cs = {
+                    "date": "fecha",
+                    "name": "nombre",
+                    "category": "categoria",
+                    "value": "valor"
+                };
             d3.csv(csv_url).then(tidying)
 
             function updateTable(d) {
@@ -55,7 +76,16 @@
                     .selectAll("td")
                     .data(e => columns.map(x => e[x]))
                     .join("td")
-                        .text(x => x);
+                        .text(x => x)
+                        .on("click", x => CompanyUpdate(x))
+            }
+
+            var prueba;
+
+            function CompanyUpdate(x){
+                prueba = x.target.innerHTML;
+                console.log(prueba)
+                updateSelect()
             }
 
             function makeHeader(d) {
@@ -72,19 +102,95 @@
             function tidying(d) {
                 data = d;
                 columns = d.columns;
-                
-                updateTable(data)
-                makeHeader(data)
+                maxValue = d3.reduce(d, (p, v) => Math.max(p,v.value) , 0)
+
+                dates = Array.from(new Set(d.map(e => e.date)));
+                dateSelector(dates);
 
                 updateSelect()
+                makeHeader(d)
+
+            }
+
+            function dateSelector(d) {
+                d.sort((a,b) => d3.ascending(a.date, b.date));    
+                htmlNode = d3.select("#dateSelector");
+                htmlNode.append("label")
+                .attr("for", "dates")
+                .text("Choose a date: ");
+                htmlNode.append("select")
+                .attr("id", "dates")
+                .on("change", d => updateSelect(d))
+                .selectAll("option")
+                .data(d).enter()
+                .append("option")
+                .attr("value", e => e)
+                .text(e => e.slice(0,4));
             }
 
             function updateSelect(e) {
                 val = d3.select("select").node().value
                 fdata = d3.filter(data, d => d.date == val)
+                fdata = fdata.slice(0,10);
                 updateTable(fdata)
+                updateChart(fdata)
+                updateChart(fdata)
+            }  
+
+            function updateChart(data) {
+                svg =  d3.select("#myCanvas");
+                w = svg.node().width.baseVal.value;
+                h = svg.node().height.baseVal.value;
+
+                x = d3.scaleLinear([0, data.length], [0, w])
+                y = d3.scaleLinear([0, maxValue], [0,h])
+                cat = new Set(d3.map(data, d => d.category))
+                color = d3.scaleOrdinal(cat, d3.schemeTableau10)
+
+                svgBind = svg.text("")
+                    .selectAll("rect")
+                    .data(data)
+
+                svgBind.enter()
+                    .append('rect')
+                    .attr('x', (d , i) => x(i))
+                    .attr('y', d => y(maxValue - d.value))
+                    .attr('height', d => y(d.value))
+                    .attr('width', x(1)*0.95)
+                    .attr('fill', d => d.name == prueba ? "forestgreen" : "firebrick")
+
+                svgBind.enter()
+                    .append("text")
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('transform', 
+                          (d , i) => 'translate(' + x(i+0.5) +
+                            ',' + y(maxValue - d.value - 5000)+'),' 
+                            + 'rotate(-90)')
+                    .text(d => d.name);
             }
 
+            function colorP() {
+                d3.selectAll("p").style("color", "red");
+            }
+            
+            
+            function highlight(d) {
+                d3.select("table")
+                .selectAll("tr")
+                .data(d)
+                .on("click", function() {
+                    svgBind.enter()
+                    .append('rect')
+                    .attr('x', (d , i) => x(i))
+                    .attr('y', d => y(maxValue - d.value))
+                    .attr('height', d => y(d.value))
+                    .attr('width', x(1)*0.95)
+                    .attr('fill', 'blue')
+                    
+                })  
+            }
+            
         </script>
     </body>
 </html>
