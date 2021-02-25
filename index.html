@@ -59,9 +59,9 @@
         </p>
 
         <script>
-            csv_url = false ? "histogram-data1.csv" : "https://raw.githubusercontent.com/RoberAlcaraz/d3js-Assignment-4/main/histogram-data1.csv";
+            csv_url = false ? "histogram-data.csv" : "https://raw.githubusercontent.com/RoberAlcaraz/d3js-Assignment-4/main/histogram-data.csv";
           
-            d3.csv(csv_url).then(tidying)
+            d3.dsv(';', csv_url).then(tidying)
 
             var data, columns, maxValue;
 
@@ -92,33 +92,27 @@
                     .selectAll("th")
                     .data(columns)
                     .join("th").text(e => e)
+                    .on("click", e => CompanyUpdate(e))
+                    
             }
 
             
             function tidying(d) {
-                console.log(d)
-            }
+                data = d;
+                columns = d.columns;
+                maxValue = d3.reduce(d, (p, v) => Math.max(p,v.data1) , 0)
 
-            function dateSelector(d) {
-                d.sort((a,b) => d3.ascending(a.date, b.date));    
-                htmlNode = d3.select("#dateSelector");
-                htmlNode.append("label")
-                .attr("for", "dates")
-                .text("Choose a date: ");
-                htmlNode.append("select")
-                .attr("id", "dates")
-                .on("change", d => updateSelect(d))
-                .selectAll("option")
-                .data(d).enter()
-                .append("option")
-                .attr("value", e => e)
-                .text(e => e.slice(0,4));
+                updateTable(data);
+                makeHeader(data)
+                console.log(data)
+
+                highlight(d)
             }
 
             function updateSelect(e) {
                 val = d3.select("select").node().value
-                fdata = d3.filter(data, d => d.date == val)
-                fdata = fdata.slice(0,10);
+                
+                console.log(val)
                 updateTable(fdata)
                 updateChart(fdata)
                 updateChart(fdata)
@@ -129,32 +123,22 @@
                 w = svg.node().width.baseVal.value;
                 h = svg.node().height.baseVal.value;
 
-                x = d3.scaleLinear([0, data.length], [0, w])
-                y = d3.scaleLinear([0, maxValue], [0,h])
-                cat = new Set(d3.map(data, d => d.category))
+                x1 = d3.scaleLinear([0, data.length], [0, w])
+                y1 = d3.scaleLinear([0, maxValue], [0,h])
+                cat = new Set(d3.map(data, d => d.x))
                 color = d3.scaleOrdinal(cat, d3.schemeTableau10)
 
                 svgBind = svg.text("")
                     .selectAll("rect")
                     .data(data)
 
-                svgBind.enter()
+                    svgBind.enter()
                     .append('rect')
-                    .attr('x', (d , i) => x(i))
-                    .attr('y', d => y(maxValue - d.value))
-                    .attr('height', d => y(d.value))
-                    .attr('width', x(1)*0.95)
-                    .attr('fill', d => d.name == prueba ? "forestgreen" : "firebrick")
-
-                svgBind.enter()
-                    .append("text")
-                    .attr('x', 0)
-                    .attr('y', 0)
-                    .attr('transform', 
-                          (d , i) => 'translate(' + x(i+0.5) +
-                            ',' + y(maxValue - d.value - 5000)+'),' 
-                            + 'rotate(-90)')
-                    .text(d => d.name);
+                    .attr('x', (d , i) => x1(i))
+                    .attr('y', d => y1(maxValue - d.data1))
+                    .attr('height', d => y1(d.data1))
+                    .attr('width', x1(1)*0.95)
+                    .attr('fill', 'blue')
             }
 
             function colorP() {
@@ -170,8 +154,8 @@
                     svgBind.enter()
                     .append('rect')
                     .attr('x', (d , i) => x(i))
-                    .attr('y', d => y(maxValue - d.value))
-                    .attr('height', d => y(d.value))
+                    .attr('y', d => y(maxValue - d.data1))
+                    .attr('height', d => y(d.data1))
                     .attr('width', x(1)*0.95)
                     .attr('fill', 'blue')
                     
