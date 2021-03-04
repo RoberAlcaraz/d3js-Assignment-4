@@ -2,23 +2,32 @@
 <html>
     <head>
         <title>d3.js data driven page</title>
-        <script src="https://d3js.org/d3.v6.min.js"></script>
+        <meta charset="utf-8">
+        
         <style>
 
             #myCanvas {
                 background-color:darkseagreen;
             }
 
-            th {
-                color:darkblue;
+            #hist {
+                background-color:darkseagreen;
             }
 
-            .name {
-                color: red;
-                border: solid black 1pt;
+            .data1 {
+                color:tomato;
+                border: solid whitesmoke 1pt;
+            }
+            .data2 {
+                color:mediumorchid;
+                border: solid whitesmoke 1pt;
+            }
+            .data3 {
+                color:midnightblue;
+                border: solid whitesmoke 1pt;
             }
 
-            .name:hover {
+            .data1:hover {
                 border-width: 2pt;
             }
 
@@ -33,222 +42,279 @@
     </head>
 
     <body>
-        <h1>3rd Assignment Data Tidying and Reporting</h1>
+        <h1>4th Assignment Data Tidying and Reporting</h1>
+        <hr>
+        <h3>Roberto Jesús Alcaraz Molina</h1>
         <hr>
         <p>
-            In the folllowing example we can observe some data of well-knowns brands. We have the date,
-            the name of the company, their category and finally their value. We can select the top 10 
-            most valuable companies from each year and then, if we click in one of them, their color in 
-            the graph will change.
+            In the folllowing example, we can plot an histogram for each variable data1, data2 and data3
+            that appear in the table by clicking in their names.
         </p>
-        <p>
-            This page is inspired by the 
-            <a href="https://observablehq.com/@d3/bar-chart-race" target="_blank"><b>Bar Chart Race</b></a>
-            <button onclick="colorP()">Click me</button>
 
-            <div id="dateSelector"></div>
-            <svg id="myCanvas" style="width:100%; height: 200px;"></svg>
-            <table id="myTable" border="1">
-                <thead></thead>
-                <tbody>
-                    <tr>
-                        <td></td>
-                    </tr>
-                </tbody>
-            </table>
-        </p>
+
+        <div id="dateSelector"></div>
+        <svg id="myCanvas" style="width:100%; height: 200px;"></svg><br>
+        <br>
+        <table id="myTable" border="1">
+            <thead></thead>
+            <tbody>
+                <tr>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        <br>
+
+        <script src="https://d3js.org/d3.v6.min.js"></script>
 
         <script>
+            var d3v6 = window.d3;
             csv_url = false ? "histogram-data.csv" : "https://raw.githubusercontent.com/RoberAlcaraz/d3js-Assignment-4/main/histogram-data.csv";
           
-          d3.dsv(';', csv_url).then(tidying)
+            d3v6.dsv(';', csv_url).then(tidying)
 
-          var data, columns, maxValue;
-          function tidying(d) {
-              data = d;
-              columns = d.columns;
+            var data, columns, maxValue;
+            function tidying(d) {
+                data = d;
+                columns = d.columns;
 
-              maxValue1 = d3.reduce(d, (p, v) => Math.max(p,v.data1) , 0)
-              maxValue2 = d3.reduce(d, (p, v) => Math.max(p,v.data2) , 0)
-              maxValue3 = d3.reduce(d, (p, v) => Math.max(p,v.data3) , 0)
-              minValue3 = d3.reduce(d, (p, v) => Math.min(p,v.data3) , 0)
+                maxValue1 = d3v6.reduce(d, (p, v) => Math.max(p,v.data1) , 0)
+                maxValue2 = d3v6.reduce(d, (p, v) => Math.max(p,v.data2) , 0)
+                maxValue3 = d3v6.reduce(d, (p, v) => Math.max(p,v.data3) , 0)
+                minValue3 = d3v6.reduce(d, (p, v) => Math.min(p,v.data3) , 0)
 
-              updateTable(d);
-              makeHeader(d);
-              
-          }
+                updateTable(d);
+                makeHeader(d);
+                
+            }
 
-          function updateTable(d) {
-              d3.select("table tbody")
-                  .selectAll("tr")
-                  .data(d)
-                  .join("tr")
-                  .selectAll("td")
-                  .data(e => columns.map(x => e[x]))
-                  .join("td")
-                  .text(x => x)
-                  .on('click', (x, d) => CompanyUpdate1(x, d))
-          }
+            function updateTable(d) {
+                d3v6.select("table tbody")
+                    .selectAll("tr")
+                    .data(d)
+                    .join("tr")
+                    .selectAll("td")
+                    .data(e => columns.map(x => e[x]))
+                    .join("td")
+                    .text(x => x)
+                    .on('click', (x, d) => CompanyUpdate1(x, d))
+            }
 
-          function makeHeader(d) {
-              d3.select("table thead").selectAll("tr").remove()
+            function makeHeader(d) {
+                d3v6.select("table thead").selectAll("tr").remove()
 
-              d3.select("table thead")
-                  .append("tr")
-                  .selectAll("th")
-                  .data(columns)
-                  .join("th")
-                  .text(e => e)
-                  .on('click', (x, d) => CompanyUpdate(x, d))
-          }
-          var prueba;
+                d3v6.select("table thead")
+                    .append("tr")
+                    .selectAll("th")
+                    .data(columns)
+                    .join("th")
+                    .text(e => e)
+                    .attr("class", e => e)
+                    .on('click', (x, d) => CompanyUpdate(x, d))
+            }
+            var prueba;
 
-          function CompanyUpdate(x, d){
-              prueba = x;
+            function CompanyUpdate(x, d){
+                prueba = x;
 
-              if (prueba.target.innerHTML == "data1") {
-                  updateChart1(data)
-              }
+                if (prueba.target.innerHTML == "data1") {
+                    updateChart1(data)
+                }
 
-              if (prueba.target.innerHTML == "data2") {
-                  updateChart2(data)
-              }
+                if (prueba.target.innerHTML == "data2") {
+                    updateChart2(data)
+                }
 
-              if (prueba.target.innerHTML == "data3") {
-                  updateChart3(data)
-              }
-          }
+                if (prueba.target.innerHTML == "data3") {
+                    updateChart3(data)
+                }
+            }
 
-          function CompanyUpdate1(x, d){
-              prueba = x;
-              console.log(d)
-              updateChart(d)
-              if (prueba.target.innerHTML == "data1") {
-                  console.log(d)
-              }
-          }
-
-          
-
-
-          function updateChart1(data) {
-              svg =  d3.select("#myCanvas");
-
-              w = svg.node().width.baseVal.value;
-              h = svg.node().height.baseVal.value;
-
-              x = d3.scaleLinear([0, data.length], [0, w])
-              y = d3.scaleLinear([0, maxValue1], [-5, h])
-
-              cat = new Set(d3.map(data, d => d.x))
-              color = d3.scaleOrdinal(cat, d3.schemeTableau10)
-
-              svgBind = svg.text("")
-                  .selectAll("rect")
-                  .data(data)
-
-              svgBind.enter()
-                  .append('rect')
-                  .attr('x', (d , i) => x(i))
-                  .attr('y', d => y(maxValue1 - d.data1))
-                  .attr('height', d => y(d.data1))
-                  .attr('width', x(1)*0.95)
-                  .attr('fill', "red")
-
-              svgBind.enter()
-                  .append("text")
-                  .attr('x', 0)
-                  .attr('y', 0)
-                  .attr('transform', 
-                        (d , i) => 'translate(' + x(i+0.5) +
-                          ',' + y(maxValue1 - d.data1 - 5000)+'),' 
-                          + 'rotate(-90)')
-                  .text(d => d.x);
-          }
-
-
-          function updateChart2(data) {
-              svg =  d3.select("#myCanvas");
-
-              w = svg.node().width.baseVal.value;
-              h = svg.node().height.baseVal.value;
-
-              x = d3.scaleLinear([0, data.length], [0, w])
-              y = d3.scaleLinear([0, maxValue2], [-5,h])
-
-              cat = new Set(d3.map(data, d => d.x))
-              color = d3.scaleOrdinal(cat, d3.schemeTableau10)
-
-              svgBind = svg.text("")
-                  .selectAll("rect")
-                  .data(data)
-
-              svgBind.enter()
-                  .append('rect')
-                  .attr('x', (d , i) => x(i))
-                  .attr('y', d => y(maxValue2 - d.data2))
-                  .attr('height', d => y(d.data2))
-                  .attr('width', x(1)*0.95)
-                  .attr('fill', "red")
-
-              svgBind.enter()
-                  .append("text")
-                  .attr('x', 0)
-                  .attr('y', 0)
-                  .attr('transform', 
-                        (d , i) => 'translate(' + x(i+0.5) +
-                          ',' + y(maxValue2 - d.data2 - 5000)+'),' 
-                          + 'rotate(-90)')
-                  .text(d => d.x);
-          }
-
-
-          function updateChart3(data) {
-              svg =  d3.select("#myCanvas");
-
-              w = svg.node().width.baseVal.value;
-              h = svg.node().height.baseVal.value;
-
-              x = d3.scaleLinear([0, data.length], [0, w])
-              y = d3.scaleLinear([minValue3, maxValue3], [-5, h])
-
-              cat = new Set(d3.map(data, d => d.x))
-              color = d3.scaleOrdinal(cat, d3.schemeTableau10)
-
-              svgBind = svg.text("")
-                  .selectAll("rect")
-                  .data(data)
-
-              svgBind.enter()
-                  .append('rect')
-                  .attr('x', (d , i) => x(i))
-                  .attr('y', d => y(maxValue3 - d.data3))
-                  .attr('height', d => y(d.data3))
-                  .attr('width', x(1)*0.95)
-                  .attr('fill', "red")
-
-              svgBind.enter()
-                  .append("text")
-                  .attr('x', 0)
-                  .attr('y', 0)
-                  .attr('transform', 
-                        (d , i) => 'translate(' + x(i+0.5) +
-                          ',' + y(maxValue3 - d.data3 - 5000)+'),' 
-                          + 'rotate(-90)')
-                  .text(d => d.x);
-          }
-
-          function colorP() {
-              d3.selectAll("p").style("color", "red");
-          }
+            function CompanyUpdate1(x, d){
+                prueba = x;
+                console.log(d)
+                updateChart(d)
+                if (prueba.target.innerHTML == "data1") {
+                    console.log(d)
+                }
+            }
 
             
+
+
+            function updateChart1(data) {
+                svg =  d3v6.select("#myCanvas");
+
+                w = svg.node().width.baseVal.value;
+                h = svg.node().height.baseVal.value;
+
+                x = d3v6.scaleLinear([0, data.length], [0, w])
+                y = d3v6.scaleLinear([0, maxValue1], [-5, h])
+
+                cat = new Set(d3v6.map(data, d => d.x))
+                color = d3v6.scaleOrdinal(cat, d3v6.schemeTableau10)
+
+                svgBind = svg.text("")
+                    .selectAll("rect")
+                    .data(data)
+
+                svgBind.enter()
+                    .append('rect')
+                    .attr('x', (d , i) => x(i))
+                    .attr('y', d => y(maxValue1 - d.data1))
+                    .attr('height', d => y(d.data1))
+                    .attr('width', x(1)*0.95)
+                    .attr('fill', "tomato")
+
+                svgBind.enter()
+                    .append("text")
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('transform', 
+                        (d , i) => 'translate(' + x(i+0.5) +
+                            ',' + y(maxValue1 - d.data1 - 5000)+'),' 
+                            + 'rotate(-90)')
+                    .text(d => d.x);
+            }
+
+
+            function updateChart2(data) {
+                svg =  d3v6.select("#myCanvas");
+
+                w = svg.node().width.baseVal.value;
+                h = svg.node().height.baseVal.value;
+
+                x = d3v6.scaleLinear([0, data.length], [0, w])
+                y = d3v6.scaleLinear([0, maxValue2], [-5,h])
+
+                cat = new Set(d3v6.map(data, d => d.x))
+                color = d3v6.scaleOrdinal(cat, d3v6.schemeTableau10)
+
+                svgBind = svg.text("")
+                    .selectAll("rect")
+                    .data(data)
+
+                svgBind.enter()
+                    .append('rect')
+                    .attr('x', (d , i) => x(i))
+                    .attr('y', d => y(maxValue2 - d.data2))
+                    .attr('height', d => y(d.data2))
+                    .attr('width', x(1)*0.95)
+                    .attr('fill', "mediumorchid")
+
+                svgBind.enter()
+                    .append("text")
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('transform', 
+                        (d , i) => 'translate(' + x(i+0.5) +
+                            ',' + y(maxValue2 - d.data2 - 5000)+'),' 
+                            + 'rotate(-90)')
+                    .text(d => d.x);
+            }
+
+
+            function updateChart3(data) {
+                svg =  d3v6.select("#myCanvas");
+
+                w = svg.node().width.baseVal.value;
+                h = svg.node().height.baseVal.value;
+
+                x = d3v6.scaleLinear([0, data.length], [0, w])
+                y = d3v6.scaleLinear([minValue3, maxValue3], [-5, h])
+
+                cat = new Set(d3v6.map(data, d => d.x))
+                color = d3v6.scaleOrdinal(cat, d3v6.schemeTableau10)
+
+                svgBind = svg.text("")
+                    .selectAll("rect")
+                    .data(data)
+
+                svgBind.enter()
+                    .append('rect')
+                    .attr('x', (d , i) => x(i))
+                    .attr('y', d => y(maxValue3 - d.data3))
+                    .attr('height', d => y(d.data3))
+                    .attr('width', x(1)*0.95)
+                    .attr('fill', "midnightblue")
+
+                svgBind.enter()
+                    .append("text")
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('transform', 
+                        (d , i) => 'translate(' + x(i+0.5) +
+                            ',' + y(maxValue3 - d.data3 - 5000)+'),' 
+                            + 'rotate(-90)')
+                    .text(d => d.x);
+            }
+
+            function colorP() {
+                d3v6.selectAll("p").style("color", "red");
+            }
+
+            window.d3 = null
         </script>
 
         <p>
-            And finally, we can choose to plot the three histograms together:
+            Besides, we can click the button "Plot all
+            together" to see the three histograms at the same time. 
         </p>
-        <button type="button" id="allHist" onclick="d()">Plot all together</button>
+        <button type="button" id="hist" onclick="allHist()">Plot all together</button>
+
+
+        <script src="https://d3js.org/d3.v4.js"></script>       
+        <script>
+            function allHist(){
+                var d3v4 = window.d3;
+                var margin = {top: 10, right: 20, bottom: 20, left: 20},
+                width = 500 - margin.left - margin.right,
+                height = 250 - margin.top - margin.bottom;
+
+                var svg = d3v4.select("#hist")
+                            .append("svg")
+                            .attr("width", width + margin.left + margin.right)
+                            .attr("height", height + margin.top + margin.bottom)
+                            .append("g")
+                            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                // Load the data using the version 4
+                d3v4.text("https://raw.githubusercontent.com/RoberAlcaraz/d3js-Assignment-4/main/histogram-data.csv", function(error, raw){
+                    var dsv = d3v4.dsvFormat(';')
+                    var data = dsv.parse(raw)
+                    
+                    var subgroups = data.columns.slice(1)
+
+                    var groups = d3v4.map(data, function(d){return(d.x)}).keys()
+
+                    var x = d3v4.scaleBand().domain(groups).range([0, width]).padding([0.3])
+                    svg.append("g").attr("transform", "translate(0," + height + ")")
+                    .call(d3v4.axisBottom(x).tickSize(0));
+
+                    var y = d3v4.scaleLinear().domain([0, 70]).range([ height, 0 ]);
+                    svg.append("g").call(d3v4.axisLeft(y));
+
+                    var xSubgroup = d3v4.scaleBand().domain(subgroups).range([0, x.bandwidth()]).padding([])
+
+                    var color = d3v4.scaleOrdinal().domain(subgroups).range(['tomato','mediumorchid','midnightblue'])
+
+                    svg.append("g").selectAll("g")
+                    .data(data).enter()
+                    .append("g")
+                    .attr("transform", function(d) { return "translate(" + x(d.x) + ",0)"; })
+                    .selectAll("rect")
+                    .data(function(d) { return subgroups.map(function(key) { return {key: key, value: d[key]}; }); })
+                    .enter().append("rect")
+                    .attr("x", function(d) { return xSubgroup(d.key); })
+                    .attr("y", function(d) { return y(d.value); })
+                    .attr("width", xSubgroup.bandwidth())
+                    .attr("height", function(d) { return height - y(d.value); })
+                    .attr("fill", function(d) { return color(d.key); });
+
+                    })
+                    window.d3 = null
+                }
+        </script>
+
 
     </body>
 </html>
