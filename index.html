@@ -16,15 +16,15 @@
 
             .data1 {
                 color:tomato;
-                border: solid whitesmoke 1pt;
+                border: solid black 2pt;
             }
             .data2 {
                 color:mediumorchid;
-                border: solid whitesmoke 1pt;
+                border: solid black 2pt;
             }
             .data3 {
                 color:midnightblue;
-                border: solid whitesmoke 1pt;
+                border: solid black 2pt;
             }
 
             .data1:hover {
@@ -132,11 +132,7 @@
 
             function CompanyUpdate1(x, d){
                 prueba = x;
-                console.log(d)
                 updateChart(d)
-                if (prueba.target.innerHTML == "data1") {
-                    console.log(d)
-                }
             }
 
             
@@ -233,8 +229,8 @@
                 svgBind.enter()
                     .append('rect')
                     .attr('x', (d , i) => x(i))
-                    .attr('y', d => y(maxValue3 - d.data3))
-                    .attr('height', d => y(d.data3))
+                    .attr('y', d => y(maxValue3 + minValue3 - Math.max(0, d.data3)))
+                    .attr('height', d => y(Math.abs(d.data3) + minValue3))
                     .attr('width', x(1)*0.95)
                     .attr('fill', "midnightblue")
 
@@ -305,9 +301,12 @@
                     .data(function(d) { return subgroups.map(function(key) { return {key: key, value: d[key]}; }); })
                     .enter().append("rect")
                     .attr("x", function(d) { return xSubgroup(d.key); })
-                    .attr("y", function(d) { return y(d.value); })
+                    .attr("y", function(d) { 
+                        if (d.value > 0) {return y(d.value)}
+                        else {return y(0)}
+                    })
                     .attr("width", xSubgroup.bandwidth())
-                    .attr("height", function(d) { return height - y(d.value); })
+                    .attr("height", function(d) { return Math.abs(y(d.value) - y(0)) })
                     .attr("fill", function(d) { return color(d.key); });
 
                     })
